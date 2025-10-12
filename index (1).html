@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Przydział do stołów</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow-x: hidden;
+      font-family: "Georgia", serif;
+    }
+
+    body {
+      text-align: center;
+      background-image: url('tlo.jpg');
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      box-sizing: border-box;
+      padding: 50px 20px;
+    }
+
+    .logo {
+      width: 180px;
+      margin-top: 80px;
+      opacity: 0.85;
+    }
+
+    .input-group {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 45px;
+      width: 100%;
+      max-width: 350px;
+    }
+
+    input {
+      padding: 14px;
+      font-size: 16px;
+      flex-grow: 1;
+      border: 2px solid #fff;
+      border-radius: 4px 0 0 4px;
+      outline: none;
+      background-color: rgba(255, 255, 255, 0.9);
+      color: #000;
+      font-weight: bold;
+      transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+
+    input:focus {
+      border-color: #daa520;
+      box-shadow: 0 0 10px 3px rgba(218, 165, 32, 0.8);
+      background-color: #fff;
+    }
+
+    button {
+      width: 48px;
+      height: 48px;
+      font-size: 20px;
+      margin-left: 0;
+      cursor: pointer;
+      border: none;
+      border-radius: 0 4px 4px 0;
+      background-color: #444;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #666;
+    }
+
+    #result {
+      margin-top: 30px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #000;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 15px 20px;
+      border-radius: 8px;
+      max-width: 90%;
+      word-wrap: break-word;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      position: relative;
+    }
+
+    #result.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .table-image {
+      width: 100px;
+      margin-top: 20px;
+    }
+
+    /* Obrazek MENU – powiększony, wyśrodkowany i zakotwiczony na dole */
+    .menu-image-container {
+      position: fixed;
+      bottom: 35px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      z-index: 100;
+    }
+
+    .menu-image-container img {
+      width: 150px; /* powiększony obraz */
+      opacity: 0.9;
+      cursor: pointer;
+      border-radius: 15px; /* zaokrąglone rogi */
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .menu-image-container img:hover {
+      transform: scale(1.08);
+      opacity: 1;
+    }
+
+    /* Styl przycisków grupy Julii Kot */
+    .julia-group-container {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 25px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .julia-group-button {
+      background: linear-gradient(145deg, #fffef5, #ffeaa0);
+      color: black;
+      font-family: "Georgia", serif;
+      font-size: 20px;
+      font-weight: bold;
+      padding: 60px 40px;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+      min-width: 120px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .julia-group-button::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAABnrd7EAAAACXBIWXMAAAsSAAALEgHS3X78AAABIklEQVR42u2YwUoDQRBFz3RQhQSZiBUU5CCUQIqewU+QUPAHsD6IQkGJ0hIoCIiNQN9nTizO7+2Z79jz5+mVdvbcyiQQCBAAiQAAkAAJkAACRAAiQAAJkAACZAACZAAAkAACRAAiQAAJkAACZAAAkAAJkAACZAAAkAACRAAiQAAJkAACZAAAkAAJkAACRAAiQAAJkAACZAAAkAACZAAAkAAJkAACRAAiQAAJkAACZAAAkAAJkAACRAAiQAAJkAACZAAAkAAJkAACRAAiQAAJkAACZAACZAAAkAACRAAiQAAJkAACZAACZAAAkAAJkAAJkAACRAAiQAAJkAACZAACZAAAkAACRAAiQAAJkAACZAACZAAAkAACRAAiQAAJkAACZAACZAAAkAACRAAiQAAJkAACZAACZAAAkAACZAACZAAAkAACZAAAkAALkn5HhgR6fD7wAAAABJRU5ErkJggg==");
+      background-repeat: repeat;
+      opacity: 0.18;
+      pointer-events: none;
+    }
+
+    .julia-group-button:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+
+    @media (max-width: 500px) {
+      .julia-group-container {
+        flex-direction: column;
+        align-items: center;
+      }
+      .julia-group-button {
+        padding: 50px 30px;
+        font-size: 18px;
+      }
+      .menu-image-container img {
+        width: 120px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <img src="logo.png" alt="Logo imprezy" class="logo" />
+
+  <div class="input-group">
+    <input type="text" id="guestName" placeholder="Imię i nazwisko" autocomplete="off" aria-label="Wpisz imię i nazwisko" />
+    <button onclick="findTable()" aria-label="Szukaj">🔍</button>
+  </div>
+
+  <div id="result" aria-live="polite" role="alert"></div>
+
+  <!-- Obrazek MENU na środku dolnej krawędzi -->
+  <div class="menu-image-container">
+    <a href="https://mwtesttesttest.github.io/menu/">
+      <img src="napismenu.png" alt="Menu">
+    </a>
+  </div>
+  
+  <script>
+   const guests = {
+  "Martyna Dec": 1,
+  "Wiktoria Duda": 1,
+  "Damian Dubiel": 1,
+  "Yelyzaveta Kotniuk": 1,
+  "Maciej Kolasa": 1,
+  "Filip Kuca": 1,
+  "Mateusz Gawiński": 1,
+  "Szymon Kurus": 1,
+  "Kacper Kraśnik": 1,
+  "Piotr Kuchciak": 1,
+  "Agata Dusza": 1,
+  "Mikołaj Dyrka": 1,
+  "Zofia Marcula": 1,
+  "Aleksandra Dembicka": 1,
+  "Tymoteusz Czukiewski": 1,
+
+  "Jan Szczerba": 2,
+  "Filip Szczepanek": 2,
+  "Aleksandra Tarka": 2,
+  "Maciej Pelc": 2,
+  "Oliwia Stasiewicz": 2,
+  "Julia Dąbrowska": 2,
+  "Melania Bojar": 2,
+  "Wiktor Patyra": 2,
+  "Mateusz Suszek": 2,
+  "Dominika Osińska": 2,
+  "Aleksandra Skarzyńska": 2,
+  "Joanna Szpala": 2,
+  "Iga Szkałuba": 2,
+  "Maja Tkaczyk": 2,
+  "Aleksandra Szubarczyk": 2,
+  "Agnieszka Śmiech": 2,
+
+  "Maja Antoniuk": 3,
+  "Marta Adamczyk": 3,
+  "Dawid Bara": 3,
+  "Bartosz Baran": 3,
+  "Alicja Sochocka": 3,
+  "Karol Sowa": 3,
+  "Adam Małkiewicz": 3,
+  "Emilia Listos": 3,
+  "Anastazja Lisek": 3,
+  "Weronika Serwatka": 3,
+  "Martyna Markowska": 3,
+  "Jan Przywała": 3,
+  "Dawid Bąk": 3,
+  "Jakub Banaszek": 3,
+  "Kinga Barańska": 3,
+  "Jan Żołnowski": 3,
+   "Anna Guzy": 3,
+
+  "Milena Krupa": 4,
+  "Karol Kraska": 4,
+  "Magdalena Kowalczyk": 4,
+  "Paulina Kozłowska": 4,
+  "Weronika Źrodowska": 4,
+  "Jakub Żebrowski": 4,
+  "Edyta Drygaś": 4,
+  "Angelika Łazańska": 4,
+  "Julia Płoszczyca": 4,
+  "Magdalena Roszczenko": 4,
+  "Marcjanna Pruchniak": 4,
+  "Kamil Rumiński": 4,
+  "Jakub Kuśmierczyk": 4,
+  "Alicja Pudelska": 4,
+  "Kacper Grzegorczyk": 4,
+  "Karolina Rusek": 4,
+  "Kamila Sus": 4,
+  "Lilianna Czopińska": 4,
+  "Michał Krzowski": 4,
+  "Barbara Rojek": 4,
+
+  "Jan Poleszak": 5,
+  "Katarzyna Ostrowska": 5,
+  "Paulina Wesołowska": 5,
+  "Tobiasz Wróblewski": 5,
+  "Stanisław Zbita": 5,
+  "Wiktor Wolniaczyk": 5,
+  "Maria Woś": 5,
+  "Anna Wyjadłowska": 5,
+  "Andrii Molodets": 5,
+  "Maksym Purdenko": 5,
+  "Julia Wojda": 5,
+  "Aleksandra Wojtanowicz": 5,
+  "Aleksandra Makarewicz": 5,
+  "Marcel Wilim": 5,
+  "Bartosz Wiewiórka": 5,
+  "Jakub Wilczopolski": 5,
+  "Łukasz Wiatr": 5,
+  "Jan Umiński": 5,
+
+  "Miłosz Badach": 6,
+  "Igor Kusio": 6,
+  "Wiktoria Krowisz": 6,
+  "Patryk Guziak": 6,
+  "Monika Sewera": 6,
+  "Gabriela Worotyłko": 6,
+  "Agnieszka Kapusta": 6,
+  "Natalia Sędzik": 6,
+  "Kornelia Kursa": 6,
+  "Magdalena Kosarzycka": 6,
+  "Weronika Kojtych": 6,
+  "Patrycja Kmiecik": 6,
+  "Wiktor Kaliciński": 6,
+  "Anna Kisielewska": 6,
+  "Natalia Sokół": 6,
+  "Olga Wojdyga": 6,
+  "Julia Kępowicz": 6,
+  "Dominika Leżucha": 6,
+  "Wiktoria Klementewicz": 6,
+  "Angelika Kita": 6,
+  "Wiktoria Kawalec": 6,
+  "Julia Kot": 6,
+  "Martyna Klin": 6,
+  "Julia Wójcik": 6,
+
+  "Anna Piechowska": 7,
+  "Dominika Małek": 7,
+  "Aleksandra Pietrzak": 7,
+  "Jowita Pluta": 7,
+  "Julia Płaza-Kościańczuk": 7,
+  "Zuzanna Sudewicz": 7,
+  "Filip Pogoda": 7,
+  "Bartłomiej Pawlonka": 7,
+  "Maciej Onyśk": 7,
+  "Błażej Otłowski": 7,
+  "Piotr Stasiak": 7,
+  "Krzysztof Suraj": 7,
+  "Wiktoria Stróż": 7,
+  "Izabela Strąk": 7,
+  "Mikołaj Czerwonka": 7,
+  "Michał Iwaszko": 7,
+  "Piotr Szabat": 7,
+  "Anna Suska": 7,
+  "Marcel Polański": 7,
+  "Zuzanna Stochmal": 7,
+  "Kinga Syrkiewicz": 7,
+  "Angelika Imasz": 7,
+  "Jakub Kacprzyk": 7,
+  "Kamil Jucha": 7,
+  "Michał Juszczuk": 7,
+  "Norbert Jurjew": 7,
+  "Tomasz Jankowski": 7,
+
+  "Mikołaj Brzusek": 8,
+  "Kasjana Budzałek": 8,
+  "Antonina Budzyń": 8,
+  "Martyna Bursztyka": 8,
+  "Alan Głodek": 8,
+  "Aleksandra Górska": 8,
+  "Aleksandra Zaręba": 8,
+  "Julia Kaczorowska": 8,
+  "Julia Grasza": 8,
+  "Wojciech Bogaczewicz": 8,
+  "Katarzyna Czopek": 8,
+  "Weronika Romaniuk": 8,
+  "Aleksandra Starzycka": 8,
+  "Julia Winiarska": 8,
+  "Jakub Koman": 8,
+  "Julia Kot": 8,
+  "Julia Kręblaś": 8,
+  "Marta Pawluczuk": 8,
+  "Laura Piaseczna": 8,
+  "Wiktoria Walentyn": 8,
+  "Katarzyna Jamrozik": 8,
+  "Alicja Kalisz": 8,
+  "Julia Świniarska": 8,
+  "Justyna Turczak": 8,
+  "Jakub Zieliński": 8,
+
+  "Zuzanna Bolek": 9,
+  "Jakub Boboń": 9,
+  "Izabela Bogucka": 9,
+  "Nikola Sobecka": 9,
+  "Karolina Suchecka": 9,
+  "Maja Chodór": 9,
+  "Oliwia Malec": 9,
+  "Filip Kozłowski": 9,
+  "Paula Weremczuk": 9,
+  "Weronika Zmysłowska": 9,
+  "Dawid Czarnacki": 9,
+  "Dominika Ciesielska": 9,
+  "Alicja Czajka": 9,
+  "Angelika Cięszczyk": 9,
+  "Magdalena Młynarczyk": 9,
+  "Jan Ciesielczyk": 9,
+  "Anna Banaś": 9,
+  "Jakub Czmok": 9,
+  "Michał Chojęta": 9,
+  "Mateusz Czech": 9,
+  "Franciszek Czerwiński": 9,
+  "Gabriela Nowak": 9,
+  "Aleksandra Nowak": 9,
+  "Tomasz Nowosielski": 9,
+  "Zofia Nurek": 9,
+  "Kaja Musiał": 9,
+  "Amelia Michaluk": 9,
+
+  "Mateusz Wunderlich": 10,
+  "Maja Troszczyńska": 10,
+  "Joanna Wilińska": 10,
+  "Apolonia Węgrzyn": 10,
+  "Oliwia Wajda": 10,
+  "Kinga Wilczyńska": 10,
+  "Magdalena Zwierzchowska": 10,
+  "Karolina Zygarowicz": 10,
+  "Kvitoslava Lukovych": 10,
+  "Tomasz Zdon": 10,
+  "Aleksandra Ziomek": 10,
+  "Julia Wysmulska": 10,
+  "Barbara Mincewicz": 10,
+  "Gabriela Stanisławek": 10,
+  "Ada Galant": 10,
+  "Paulina Lotko": 10,
+  "Wojciech Łuczko": 10,
+  "Anna Majerska": 10,
+  "Marta Marczewska": 10,
+  "Maja Machulak": 10,
+  "Stanisław Marczuk": 10,
+  "Małgorzata Kuca": 10,
+  "Wiktor Makara": 10,
+  "Aleksandra Olszyńska": 10,
+  "Łucja Nogaj": 10,
+  "Kacper Odziemek": 10,
+  "Michał Niewęgłowski": 10,
+  "Iga Nazaruk": 10,
+  "Karolina Niedziela": 10,
+
+  "Paweł Baranowski": 11,
+  "Wiktoria Mazur": 11,
+  "Paulina Marek": 11,
+  "Alicja Maj": 11,
+  "Tomasz Lis": 11,
+  "Aleksandra Kusaj": 11,
+  "Roksana Lejk": 11,
+  "Karolina Michalik": 11,
+  "Jakub Lesiczka": 11,
+  "Jakub Bereś": 11,
+  "Michał Flis": 11,
+  "Szymon Flis": 11,
+  "Paweł Flis": 11,
+  "Grzegorz Dziedzic": 11,
+  "Weronika Schild": 11,
+  "Marcin Oklejewicz": 11,
+  "Agata Gierach-Upton": 11,
+  "Agata Gierach": 11,
+  "Anna Gil": 11,
+  "Weronika Falkowska": 11,
+  "Monika Filar": 11,
+  "Szymon Folusz": 11,
+  "Anna Kuraś": 11,
+  "Karina Kubaszewska": 11,
+  "Weronika Krupa": 11,
+  "Kamila Krzpiot": 11,
+  "Adam Młodawski": 11,
+  "Jakub Moskal": 11,
+  "Kacper Mucha": 11,
+
+  "Michalina Miszczuk": 12,
+  "Alicja Mastej": 12,
+  "Dominika Mech": 12,
+  "Małgorzata Sikora": 12,
+  "Monika Moskal": 12,
+  "Paulina Dziuba": 12,
+  "Jagoda Długosz": 12,
+  "Paulina Lewczuk": 12,
+  "Weronika Druzik": 12,
+  "Jolanta Sado": 12,
+  "Piotr Siwiec": 12,
+  "Oliwer Goździk": 12,
+  "Jakub Rybak": 12,
+  "Miłosz Smyk": 12,
+  "Dominika Skarbek": 12,
+  "Justyna Sagan": 12,
+  "Maja Siekierka": 12,
+  "Aleksandra Sapiaszko": 12,
+  "Aleksandra Siczek": 12,
+  "Oliwia Sidło": 12,
+  "Oliwia Ostrowska": 12,
+  "Karolina Kubajka": 12,
+  "Aleksandra Skrzyniarz": 12,
+  "Aleksandra Zynkowska": 12,
+  "Maja Salamon": 12,
+
+  "Kinga Mirosław": 13,
+  "Joanna Murawska": 13,
+  "Natalia Leszczyńska": 13,
+  "Weronika Filipowicz": 13,
+  "Julia Gołąbek": 13,
+  "Maria Gruszecka": 13,
+  "Agata Hotloś": 13,
+  "Patrycja Januszko": 13,
+  "Daria Imgrond": 13,
+  "Ada Jaworska": 13,
+  "Igor Chamulak": 13,
+  "Wiktoria Szczepanik": 13,
+
+  "Martyna Bartoszczyk": 14,
+  "Maciej Biskupski": 14,
+  "Maja Błońska": 14,
+  "Zuzanna Betiuk": 14,
+  "Natalia Fidut": 14,
+  "Gabriela Klonowska": 14,
+  "Kinga Bielarska": 14,
+  "Oliwia Beznosik": 14,
+  "Aleksandra Bień": 14,
+  "Szymon Bielecki": 14,
+  "Martyna Błażyca": 14,
+
+  "Agata Chapska": 15,
+  "Julia Gutowska": 15,
+  "Maksym Jęczeń": 15,
+  "Julia Kosiek": 15,
+  "Olaf Kotlarz": 15,
+  "Daniel Leśniak": 15,
+  "Antoni Chmiel": 15,
+  "Mikołaj Chmielecki": 15,
+  "Jakub Czuhan": 15,
+  "Karolina Dziubdzińska": 15,
+  "Aleksander Giermasiński": 15,
+  "Aleksandra Gałan": 15,
+  "Izabela Szpejankowska": 15,
+  "Zofia Godzisz": 15,
+  "Bernadeta Banaszczyk": 15,
+  "Oliwier Bułdak": 15,
+  "Małgorzata Świąder": 15,
+
+  "Jakub Barczuk": 16,
+  "Bartłomiej Goch": 16,
+  "Maciej Stworowski": 16,
+  "Maciej Szkodziak": 16,
+  "Małgorzata Szwedo": 16,
+  "Piotr Wolicki": 16,
+  "Magdalena Grzywacz": 16,
+  "Marietta Milas": 16,
+  "Maria Obszańska": 16,
+  "Aleksandra Piskulak": 16,
+  "Aleksandra Samborska": 16,
+  "Iga Mazur": 16,
+  "Maja Pawłowska": 16,
+  "Wojciech Skuza": 16,
+  "Julia Leszek": 16,
+  "Katarzyna Mądry": 16,
+  "Agnieszka Orzeł": 16,
+  "Aleksandra Pacek": 16,
+  "Karolina Paterek": 16,
+  "Magdalena Rejman": 16,
+
+
+
+
+  "Daria Gałczyńska": 1,
+"Mykola Shestydesiatnyi": 1,
+"Julia Wnuczyńska": 1,
+"Karolina Klisko": 1,
+"Julia Podgórska": 1,
+"Rafał Mięgoć": 1,
+"Edwin Zając": 1,
+"Magdalena Gnieciak": 2,
+"Agata Grudzień": 2,
+"Katarzyna Grudzień": 2,
+"Kacper Bernat": 2,
+"Zuzanna Drozd": 2,
+"Michał Hałas": 2,
+"Michał Zygmunt": 2,
+"Jakub Lewandowski": 2,
+"Michał Popko": 2,
+"Marco Sambataro": 3,
+"Agata Sowa": 3,
+"Eliza Kusy": 3,
+"Adam Trawiński": 3,
+"Maria Michalik": 3,
+"Alicja Bielińska": 3,
+"Maciej Droździel": 3,
+"Karol Prus": 3,
+"Dominika Miśta": 3,
+"Natalia Stachowicz": 3,
+"Piotr Bialon": 3,
+"Robert Kapalski": 4,
+"Filip Koszałka": 4,
+"Martyna Ostasiewicz": 4,
+"Adriana Kuśmierczyk": 4,
+"Dawid Dudek": 4,
+"Marcel Świdnik": 4,
+"Dominika Wąsek": 5,
+"Marta Kania": 5,
+"Adrian Materek": 5,
+"Katarzyna Rusek": 5,
+"Bartłomiej Brzozowski": 5,
+"Emilia Popławska": 5,
+"Magdalena Pustowska": 5,
+"Paulina Popławska": 5,
+"Joanna Gorajewska": 6,
+"Bartosz Gaweł": 6,
+"Tomasz Warzocha": 6,
+"Bartłomiej Bąk": 6,
+"Jakub Kurdziel": 6,
+"Andrzej Odzimek": 6,
+"Kacper Szymanek": 6,
+"Dawid Okoniewski": 6,
+"Olaf Szymański": 6,
+"Karol Paradowski": 6,
+"Jakub Augustyn": 6,
+"Bartosz Mordziński": 7,
+"Milena Majchrzyk": 7,
+"Julia Poleszak": 7,
+"Adrianna Gnat": 7,
+"Olga Jankowska": 7,
+"Zuzanna Kicior": 7,
+"Natalia Roczniak": 7,
+"Anna Profeta": 7,
+"Martyna Gubańska": 7,
+"Krzysztof Kozieł": 7,
+"Oliwia Wojdyga": 7,
+"Milena Kolasa": 7,
+"Oskar Płoszaj": 7,
+"Piotr Walenda": 7,
+"Aleksandra Błasiak": 7,
+"Karolina Lach": 7,
+"Wiktoria Rzeszot": 7,
+"Natalia Siłkowska": 7,
+"Anna Mazur": 8,
+"Karol Śnieżek": 8,
+"Franciszek Budzyń": 8,
+"Jakub Działo": 8,
+"Kornelia Drzał": 8,
+"Jagoda Góra": 8,
+"Michał Świderski": 8,
+"Dawid Kaleta": 8,
+"Bartosz Zaniewicz": 8,
+"Zuzanna Rupeć": 8,
+"Dawid Jowik": 8,
+"Cezary Florczyk": 8,
+"Stanisław Świder": 8,
+"Marcin Żurawek": 8,
+"Maciej Rekiel": 8,
+"Wojciech Sowiński": 8,
+"Michał Kondraciuk": 8,
+"Sebastian Sowa": 8,
+"Miłosz Prusiński": 8,
+"Agnieszka Szczepanik": 8,
+"Filip Cieślak": 9,
+"Szymon Gąsienica-Kotelnicki": 9,
+"Karol Muc": 9,
+"Miłosz Cisłak": 9,
+"Szymon Wroński": 9,
+"Olga Popiołek": 9,
+"Mikołaj Głogowski": 9,
+"Marcelina Smarz": 9,
+"Franciszek Grabowski": 9,
+"Kuba Guzina": 9,
+"Aleksander Pitucha": 9,
+"Jan Caruk": 9,
+"Natalia Kwiecińska": 9,
+"Piotr Bielarski": 9,
+"Katarzyna Półtorak": 9,
+"Izabela Chojęta": 9,
+"Natalia Zięba": 9,
+"Wojciech Ciecierski": 9,
+"Jakub Markowicz": 9,
+"Patryk Malinowski": 10,
+"Hubcio Pupcio": 10,
+"Hubert Jung": 10,
+"Michał Niepokój": 10,
+"Dominik Białek": 10,
+"Filip Cisek": 10,
+"Marek Lisowski": 10,
+"Natalia Horszczaruk": 10,
+"Marek Winniczuk": 10,
+"Klaudia Kańczugowska": 10,
+"Gracjan Kuca": 10,
+"Daniel Kolompar": 10,
+"Kacper Bluczak": 10,
+"Natalia Szymańska": 10,
+"Natalia Niewęgłowska": 10,
+"Michał Danilczuk": 10,
+"Jorge De San Antonio": 10,
+"Mateusz Borowy": 11,
+"Aleksandra Sroczyk": 11,
+"Dawid Sinica": 11,
+"Remigiusz Rojek": 11,
+"Olga Kamińska": 11,
+"Jan Stankiewicz": 11,
+"Oliwia Gołąb": 11,
+"Chay Gierach-Upton": 11,
+"Mateusz Wojciechowski": 11,
+"Kacper Podolec": 11,
+"Aleksandra Rola": 11,
+"Kacper Kołodziej": 11,
+"Agata Szaniawska": 11,
+"Krystian Ziarko": 12,
+"Piotr Dyląg": 12,
+"Dawid Górski": 12,
+"Dawid Skrok": 12,
+"Filip Woliński": 12,
+"Agata Demczuk": 12,
+"Jan Małysz": 12,
+"Dawid Borodej": 12,
+"Marcel Kaczmarski": 12,
+"Paweł Szkup": 12,
+"Jan Prus-Czarnecki": 12,
+"Krzysztof Borówka": 13,
+"Aleksy Gwiazda": 13,
+"Ziemowit Żaba": 13,
+"Łukasz Szacoń": 13,
+"Piotr Suwara": 13,
+"Michał Wasilewski": 13,
+"Jakub Szantyka": 13,
+"Adam Chołaj": 14,
+"Artur Dmuch": 14,
+"Paweł Poniewozik": 14,
+"Krzysztof Sroka": 14,
+"Dominik Węgiel": 14,
+"Bartłomiej Kozłowski": 14,
+"Martyna Bimek": 14,
+"Wojciech Żukowski": 14,
+"Piotr Ciosmak": 15,
+"Urszula Szymczyk": 15,
+"Katarzyna Tymińska": 15,
+"Wiktoria Piorun": 15,
+"Michał Kucharczyk": 15,
+"Damian Korona": 15,
+"Michał Doroz": 15,
+"Marianna Osadzińska": 16,
+"Justyna Łukasiewicz": 16,
+"Paweł Karpiński": 16,
+"Paweł Kozieł": 16,
+"Michał Jaworski": 16,
+"Jan Byszewski": 16,
+"Paweł Hyra": 16,
+"Jakub Bryl": 16,
+"Maciej Wojciechowski": 16,
+"Sebastian Kubrak": 16
+
+}; 
+
+      
+
+
+    const nicknameMap = {
+      "ola": "aleksandra",
+      "aleks": "aleksandra",
+      "sandra": "aleksandra",
+      "alutka": "aleksandra",
+      "matek": "mateusz",
+      "mati": "mateusz",
+      "iza": "izabela",
+      "zuzia": "zuzanna",
+      "zuzka": "zuzanna",
+      "ala": "alicja",
+      "kasia": "katarzyna",
+      "kacha": "katarzyna",
+      "basia": "barbara",
+      "gosia": "małgorzata",
+      "małgosia": "małgorzata",
+      "asia": "joanna",
+      "joasia": "joanna",
+      "bartek": "bartosz",
+      "piotruś": "piotr",
+      "krzyś": "krzysztof",
+      "Maciek": "Maciej",
+      "Oliwka": "Oliwia",
+      "Kuba": "Jakub",
+      "Paula": "Paulina",
+      "Wojtek": "Wojciech",
+      "Wera": "Weronika",
+      "Ala": "Alicja",
+      "Ania": "Anna",
+      "Zosia": "Zofia",
+      "Tomek": "Tomasz",
+      "Pola": "Apolonia",
+      "Magda": "Magdalena",
+      "Madzia": "Magdalena",
+      "Kvitka": "Kvitoslava",
+      "Gabrysia": "Gabriela",
+      "Jola": "Jolanta",
+      "Michasia": "Michalina",
+      "Marysia": "Maria",
+      "Janek": "Jan",
+      "Stasiek": "Stanisław",
+      "Tymek": "Tymoteusz",
+      "Grzesiek": "Grzegorz",
+      "Emilka": "Emilia",
+      "Mela": "Melania",
+      "Aga": "Agnieszka",
+      "Antek": "Antoni",
+      "Franek": "Franciszek",
+      "Remek": "Remigiusz"
+    };
+
+  const juliaKotData = [
+      { table: 6, group: 33 },
+      { table: 8, group: 102 }
+    ];
+
+   function normalizeName(str) {
+      return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    }
+
+    function mapNicknameToFull(name) {
+      return nicknameMap[name] || name;
+    }
+
+    function levenshtein(a, b) {
+      const matrix = [];
+      for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+      for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+      for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+          if (b.charAt(i-1) === a.charAt(j-1)) {
+            matrix[i][j] = matrix[i-1][j-1];
+          } else {
+            matrix[i][j] = Math.min(matrix[i-1][j-1]+1, matrix[i][j-1]+1, matrix[i-1][j]+1);
+          }
+        }
+      }
+      return matrix[b.length][a.length];
+    }
+
+    function showJuliaKotTable(table, group) {
+      showResult(`Witaj, <strong>Julia Kot</strong>!<br>Twój stół to numer <strong>${table}</strong>.<br>
+                  <img src="stol.png" alt="Stół" class="table-image">`);
+    }
+
+    function showResult(html) {
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = html;
+      resultDiv.classList.add('show');
+      setTimeout(() => resultDiv.classList.remove('show'), 8000);
+    }
+
+    function findTable() {
+      const input = document.getElementById('guestName');
+      const rawInput = input.value.trim();
+      const nameInput = normalizeName(rawInput);
+      const resultDiv = document.getElementById('result');
+
+      input.blur();
+
+      if (!nameInput) {
+        showResult("Proszę wpisać imię i nazwisko lub nazwisko.");
+        return;
+      }
+
+      if (nameInput === "julia kot") {
+        let html = `<div class="julia-group-container">`;
+        juliaKotData.forEach(entry => {
+          html += `<button class="julia-group-button" 
+                       onclick="showJuliaKotTable(${entry.table}, ${entry.group})">
+                       Grupa ${entry.group}
+                   </button>`;
+        });
+        html += `</div>`;
+        resultDiv.innerHTML = html;
+        resultDiv.classList.add('show');
+        return;
+      }
+
+      const inputWords = nameInput.split(/\s+/).filter(Boolean);
+
+      if (inputWords.length === 1) {
+        const lastName = inputWords[0];
+        const matches = [];
+
+        for (const [name, table] of Object.entries(guests)) {
+          const normalizedFull = normalizeName(name);
+          const parts = normalizedFull.split(" ");
+          if (parts.length < 2) continue;
+          const fullLast = parts[1];
+          const distance = levenshtein(fullLast, lastName);
+          if (distance <= 2) matches.push([name, table]);
+        }
+
+        if (matches.length === 1) {
+          const [foundName, foundTable] = matches[0];
+          showResult(`Witaj, <strong>${foundName}</strong>! Twój stół to numer <strong>${foundTable}</strong>.<br>
+            <img src="stol.png" alt="Stół" class="table-image">`);
+          return;
+        } else if (matches.length > 1) {
+          let html = `<div class="julia-group-container">`;
+          matches.forEach(([name, table]) => {
+            html += `<button class="julia-group-button" 
+                         onclick="showResult('Witaj, <strong>${name}</strong>! Twój stół to numer <strong>${table}</strong>.<br><img src=\\'stol.png\\' alt=\\'Stół\\' class=\\'table-image\\'>')">
+                         ${name}
+                     </button>`;
+          });
+          html += `</div>`;
+          resultDiv.innerHTML = html;
+          resultDiv.classList.add('show');
+          return;
+        } else {
+          showResult("Nie znaleziono gościa o podanym nazwisku.");
+          return;
+        }
+      }
+
+      if (inputWords.length >= 2) {
+        let [inputFirst, inputLast] = inputWords;
+        inputFirst = mapNicknameToFull(inputFirst);
+
+        for (const [name, table] of Object.entries(guests)) {
+          const normalizedFull = normalizeName(name);
+          const [fullFirst, fullLast] = normalizedFull.split(" ");
+          if (mapNicknameToFull(fullFirst) === inputFirst && fullLast === inputLast) {
+            showResult(`Witaj, <strong>${name}</strong>! Twój stół to numer <strong>${table}</strong>.<br>
+              <img src="stol.png" alt="Stół" class="table-image">`);
+            return;
+          }
+        }
+
+        let bestMatch = null;
+        let bestScore = Infinity;
+
+        for (const [name, table] of Object.entries(guests)) {
+          const normalizedName = normalizeName(name);
+          const nameParts = normalizedName.split(/\s+/);
+          if (nameParts.length < 2) continue;
+          let [first, last] = nameParts;
+          first = mapNicknameToFull(first);
+          const firstDistance = levenshtein(first, inputFirst);
+          const lastDistance = levenshtein(last, inputLast);
+          const weightedScore = firstDistance * 1 + lastDistance * 2;
+
+          if (weightedScore < bestScore) {
+            bestScore = weightedScore;
+            bestMatch = [name, table];
+          }
+        }
+
+        if (bestMatch && bestScore <= 4) {
+          showResult(`Witaj, <strong>${bestMatch[0]}</strong>! Twój stół to numer <strong>${bestMatch[1]}</strong>.<br>
+            <img src="stol.png" alt="Stół" class="table-image">`);
+        } else {
+          showResult("Nie znaleziono gościa o podanym imieniu i nazwisku.");
+        }
+      }
+    }
+
+    document.getElementById("guestName").addEventListener("keypress", function(event) {
+      if (event.key === "Enter") findTable();
+    });
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
